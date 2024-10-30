@@ -33,17 +33,18 @@ class App extends Component {
     }, 15000);
   };
 
-  createTodoItem = (description, min, sec, timer, status = '') => {
+  createTodoItem = (description, min, sec, timer) => {
     return {
       id: this.maxId++,
       description,
       timeCreated: `created ${this.timeCreate(timer)}`,
       timer,
-      status,
+      status: 'active',
       defaulDescription: description,
       min,
       sec,
-      timerIsTrue: false,
+      timerIsTrue: true,
+      check: false,
     };
   };
 
@@ -128,26 +129,27 @@ class App extends Component {
 
   changeStatus = id => {
     const updatedDataTasks = this.state.dataTasks.map(task => {
-      if (task.id == id) {
-        if (task.status == '') {
-          return { ...task, status: 'completed' };
-        } else if (task.status == 'completed') {
-          return { ...task, status: '' };
+      if (task.id == id && task.status == 'completed') {
+        this.startTimer(task.id, Number(task.min), Number(task.sec), null);
+      }
+      if (task.id === id) {
+        if (task.status === 'active') {
+          return { ...task, status: 'completed', check: true, timerIsTrue: false };
+        } else if (task.status === 'completed') {
+          return { ...task, status: 'active', check: false, timerIsTrue: true };
         }
       }
       return task;
     });
-
-    const filteredDataTasks = updatedDataTasks.filter(el => {
-      if (this.state.filterName === 'completed') {
-        return el.status === 'completed';
-      } else if (this.state.filterName === 'active') {
-        return el.status === '';
+    const filteredDataTasks = updatedDataTasks.filter(task => {
+      if (this.state.filterName === 'active') {
+        return task.status === 'active';
+      } else if (this.state.filterName === 'completed') {
+        return task.status === 'completed';
       } else {
         return true;
       }
     });
-
     this.setState({
       dataTasks: updatedDataTasks,
       filteredDataTasks: filteredDataTasks,
@@ -183,7 +185,7 @@ class App extends Component {
   };
 
   changeListAll = () => this.changeTaskList('all');
-  changeListActive = () => this.changeTaskList('');
+  changeListActive = () => this.changeTaskList('active');
   changeListComplete = () => this.changeTaskList('completed');
 
   clearCompleateItems = () => {
@@ -196,24 +198,28 @@ class App extends Component {
   updateTimerTask = async (id, min, sec) => {
     const newDataTasks = this.state.dataTasks.map(task => {
       if (task.id === id) {
-        return { ...task, min, sec };
+        const formattedMin = min < 10 ? `0${min}` : min;
+        const formattedSec = sec < 10 ? `0${sec}` : sec;
+        return { ...task, min: formattedMin, sec: formattedSec };
       }
       return task;
     });
     const newFilterTasks = this.state.filteredDataTasks.map(task => {
       if (task.id === id) {
-        return { ...task, min, sec };
+        const formattedMin = min < 10 ? `0${min}` : min;
+        const formattedSec = sec < 10 ? `0${sec}` : sec;
+        return { ...task, min: formattedMin, sec: formattedSec };
       }
       return task;
     });
-
-    this.setState({ dataTasks: newDataTasks, filteredDataTasks: newFilterTasks });
+    this.setState({
+      dataTasks: newDataTasks,
+      filteredDataTasks: newFilterTasks,
+    });
   };
 
   // Таймер для задач
   startTimer = (id, min, sec, timerLast) => {
-    console.log(id);
-
     const newDataTasks = this.state.dataTasks.map(task => {
       if (task.id == id) {
         return { ...task, timerIsTrue: true };
@@ -222,7 +228,7 @@ class App extends Component {
     });
     const newDataTasksFilter = this.state.filteredDataTasks.map(task => {
       if (task.id == id) {
-        return { ...task, timerIsTrue: true };
+        return { ...task };
       }
       return task;
     });
@@ -230,17 +236,13 @@ class App extends Component {
       dataTasks: newDataTasks,
       filteredDataTasks: newDataTasksFilter,
     });
-
-    console.log(this.state.dataTasks);
-    console.log(this.state.filteredDataTasks);
-
     timerLast = setInterval(() => {
-      if (
-        this.state.dataTasks.find(el => el.id == id).timerIsTrue &&
-        this.state.filteredDataTasks.find(el => el.id == id).timerIsTrue
-      ) {
+      if (this.state.dataTasks.find(el => el.id == id) == undefined) {
+        clearInterval(timerLast);
+      } else if (this.state.dataTasks.find(el => el.id == id).timerIsTrue) {
+        min = Number(min);
+        sec = Number(sec);
         if (min == 0 && sec == 0) {
-          console.log('Таймер завершен!');
           this.changeStatus(id);
           clearInterval(timerLast);
         } else if (min >= 1) {
@@ -250,7 +252,6 @@ class App extends Component {
           } else {
             sec--;
           }
-          console.log(`мин: ${min} сек: ${sec}`);
           return this.updateTimerTask(id, min, sec);
         } else if (min == 0 && sec > 0) {
           if (sec === 0) {
@@ -260,33 +261,36 @@ class App extends Component {
             sec--;
           }
 
-          console.log(`мин: ${min} сек: ${sec}`);
           return this.updateTimerTask(id, min, sec);
         }
       } else {
         clearInterval(timerLast);
-        console.log('pause');
       }
     }, 1000);
   };
+
   stopTimer = id => {
-    const newArr = this.state.dataTasks.map(task => {
-      if (task.id == id) {
-        return { ...task, timerIsTrue: false };
-      }
-      return task;
-    });
-    const newArrFilter = this.state.filteredDataTasks.map(task => {
-      if (task.id == id) {
-        return { ...task, timerIsTrue: false };
-      }
-      return task;
-    });
-    this.setState({
-      dataTasks: newArr,
-      filteredDataTasks: newArrFilter,
-    });
-    console.log(this.state);
+    const task = this.state.dataTasks.find(task => task.id === id);
+    if (task) {
+      const newArr = this.state.dataTasks.map(task => {
+        if (task.id === id) {
+          clearInterval(task.timerLast);
+          return { ...task, timerIsTrue: false, timerLast: null };
+        }
+        return task;
+      });
+      const newArrFilter = this.state.filteredDataTasks.map(task => {
+        if (task.id === id) {
+          return { ...task, timerIsTrue: false };
+        }
+        return task;
+      });
+
+      this.setState({
+        dataTasks: newArr,
+        filteredDataTasks: newArrFilter,
+      });
+    }
   };
 
   render() {

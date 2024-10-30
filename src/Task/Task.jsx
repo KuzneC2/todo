@@ -2,6 +2,11 @@ import PropTypes from 'prop-types';
 import { Component } from 'react';
 
 export default class Task extends Component {
+  componentDidMount() {
+    if (this.props.timerIsTrue) {
+      this.props.startTimer(this.props.id);
+    }
+  }
   render() {
     const {
       status,
@@ -17,8 +22,10 @@ export default class Task extends Component {
       min,
       startTimer,
       stopTimer,
+      check,
+      timerIsTrue,
     } = this.props;
-    const isCompleted = status === 'completed';
+
     if (status === 'editing') {
       return (
         <li className={status}>
@@ -41,13 +48,13 @@ export default class Task extends Component {
     return (
       <li className={status}>
         <div className="view">
-          <input className="toggle" type="checkbox" onClick={toggleStatusTodo} defaultChecked={isCompleted} />
+          <input className="toggle" type="checkbox" onClick={toggleStatusTodo} defaultChecked={check} />
 
           <label>
             <span className="title">{description}</span>
             <span className="description">
-              <button className="icon icon-play" onClick={startTimer}></button>
-              <button className="icon icon-pause" onClick={stopTimer}></button>
+              <button className="icon icon-play" onClick={startTimer} disabled={timerIsTrue}></button>
+              <button className="icon icon-pause" onClick={stopTimer} disabled={!timerIsTrue}></button>
               <p className="todo-timer">{`${min}:${sec}`}</p>
             </span>
             <span className="created">{timeCreated}</span>
