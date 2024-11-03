@@ -11,14 +11,12 @@ const App = () => {
   const [filterName, setFilterName] = useState('all');
   const [editTaskDescription, setEditTaskDescription] = useState('');
   const maxId = useRef(100);
-  // const [intervalIds, setIntervalIds] = useState([]);
-  // const intervalIdRef = useRef(null);
-
+  //изначальное отображение списка и запуск счетчика времени
   useEffect(() => {
     setFilteredDataTasks(dataTasks);
     updateTimer();
   }, []);
-
+  //обновление времени когда создали задачу
   const updateTimer = () => {
     setInterval(() => {
       setDataTasks(prevDataTask =>
@@ -35,7 +33,7 @@ const App = () => {
       );
     }, 15000);
   };
-
+  //создание задачи
   const createTodoItem = useCallback((description, min, sec, timer) => {
     return {
       id: maxId.current++,
@@ -51,12 +49,13 @@ const App = () => {
     };
   }, []);
 
+  //время создания
   const timeCreate = timer => {
     return formatDistanceToNowStrict(new Date(timer), {
       addSuffix: true,
     });
   };
-
+  //создание новой задачи
   const addItem = useCallback(
     (description, min, sec) => {
       const newItem = createTodoItem(description, min, sec, new Date() - 1);
@@ -71,7 +70,7 @@ const App = () => {
     },
     [createTodoItem, dataTasks, filteredDataTasks, filterName],
   );
-
+  //редактирование задачи
   const editTask = id => {
     const newDescription = dataTasks.find(el => el.id === id);
     setFilteredDataTasks(
@@ -89,7 +88,7 @@ const App = () => {
     );
     setEditTaskDescription(newDescription.description);
   };
-
+  //подтверждение редактирования задачи
   const editSubmit = (e, id) => {
     e.preventDefault();
     const updateDataObject = dataTasks.find(el => el.id === id);
@@ -121,11 +120,12 @@ const App = () => {
       }),
     );
   };
-
+  // изменение в поле редактирования задачи
   const changeLabel = e => {
     setEditTaskDescription(e.target.value);
   };
 
+  //изменение статуса задачи
   const changeStatus = id => {
     const updatedDataTasks = dataTasks.map(task => {
       if (task.id == id && task.status == 'completed') {
@@ -153,17 +153,17 @@ const App = () => {
     setDataTasks(updatedDataTasks);
     setFilteredDataTasks(newfilteredDataTasks);
   };
-
+  // изменение фильтрации по статусу
   const changeTaskList = status => {
     const newfilteredDataTasks = status === 'all' ? dataTasks : dataTasks.filter(el => el.status === status);
     setFilteredDataTasks(newfilteredDataTasks);
     setFilterName(status);
   };
-
+  //изменение фильтрации
   const changeListAll = () => changeTaskList('all');
   const changeListActive = () => changeTaskList('active');
   const changeListComplete = () => changeTaskList('completed');
-
+  //удаление задачи
   const deleteTask = id => {
     const idx = dataTasks.findIndex(el => el.id === id);
     const idxFilt = filteredDataTasks.findIndex(el => el.id === id);
@@ -171,7 +171,7 @@ const App = () => {
     setDataTasks([...dataTasks.slice(0, idx), ...dataTasks.slice(idx + 1)]);
     setFilteredDataTasks([...filteredDataTasks.slice(0, idxFilt), ...filteredDataTasks.slice(idxFilt + 1)]);
   };
-
+  //удаление выполненных задач
   const clearCompleateItems = () => {
     setDataTasks(dataTasks.filter(el => el.status !== 'completed'));
     setFilteredDataTasks(filteredDataTasks.filter(el => el.status !== 'completed'));
@@ -179,79 +179,88 @@ const App = () => {
 
   const taskDone = dataTasks.filter(el => el.status === 'completed').length;
   const taskLeft = dataTasks.length - taskDone;
-
-  const updateTimerTask = (id, min, sec) => {
-    const newDataTasks = dataTasks.map(task => {
-      if (task.id === id) {
-        const formattedMin = min < 10 ? `0${min}` : min;
-        const formattedSec = sec < 10 ? `0${sec}` : sec;
-        return { ...task, min: formattedMin, sec: formattedSec };
-      }
-      return task;
-    });
-    const newFilterTasks = filteredDataTasks.map(task => {
-      if (task.id === id) {
-        const formattedMin = min < 10 ? `0${min}` : min;
-        const formattedSec = sec < 10 ? `0${sec}` : sec;
-        return { ...task, min: formattedMin, sec: formattedSec };
-      }
-      return task;
-    });
-    setDataTasks(newDataTasks);
-    setFilteredDataTasks(newFilterTasks);
-  };
-
+  //запуск таймера
   const startTimer = (id, min, sec, timerLast) => {
+    console.log('start');
     const newDataTasks = dataTasks.map(task => {
       if (task.id == id) {
         return { ...task, timerIsTrue: true };
       }
       return task;
     });
-    const newDataTasksFilter = filteredDataTasks.map(task => {
-      if (task.id == id) {
-        return { ...task };
-      }
-      return task;
-    });
-
     setDataTasks(newDataTasks);
-    setFilteredDataTasks(newDataTasksFilter);
 
     timerLast = setInterval(() => {
-      if (dataTasks.find(el => el.id == id) == undefined) {
-        clearInterval(timerLast);
-      } else if (dataTasks.find(el => el.id == id).timerIsTrue) {
-        min = Number(min);
-        sec = Number(sec);
-        if (min == 0 && sec == 0) {
-          changeStatus(id);
-          clearInterval(timerLast);
-        } else if (min >= 1) {
-          if (sec === 0) {
-            min--;
-            sec = 59;
-          } else {
-            sec--;
-          }
-          return updateTimerTask(id, min, sec);
-        } else if (min == 0 && sec > 0) {
-          if (sec === 0) {
-            min--;
-            sec = 59;
-          } else {
-            sec--;
-          }
+      setDataTasks(prevDataTasks => {
+        return prevDataTasks.map(task => {
+          if (task.id === id && task.timerIsTrue) {
+            min = Number(min);
+            sec = Number(sec);
 
-          return updateTimerTask(id, min, sec);
-        }
-      } else {
-        clearInterval(timerLast);
-      }
+            if (min === 0 && sec === 0) {
+              changeStatus(id);
+              clearInterval(timerLast);
+              return task;
+            } else if (min >= 1) {
+              if (sec === 0) {
+                min--;
+                sec = 59;
+              } else {
+                sec--;
+              }
+            } else if (min === 0 && sec > 0) {
+              if (sec === 0) {
+                min--;
+                sec = 59;
+              } else {
+                sec--;
+              }
+            }
+
+            return { ...task, min: min < 10 ? `0${min}` : min, sec: sec < 10 ? `0${sec}` : sec };
+          } else {
+            return task;
+          }
+        });
+      });
+
+      setFilteredDataTasks(prevFilteredDataTasks => {
+        return prevFilteredDataTasks.map(task => {
+          if (task.id === id && task.timerIsTrue) {
+            min = Number(min);
+            sec = Number(sec);
+
+            if (min === 0 && sec === 0) {
+              changeStatus(id);
+              clearInterval(timerLast);
+              return task;
+            } else if (min >= 1) {
+              if (sec === 0) {
+                min--;
+                sec = 59;
+              } else {
+                sec--;
+              }
+            } else if (min === 0 && sec > 0) {
+              if (sec === 0) {
+                min--;
+                sec = 59;
+              } else {
+                sec--;
+              }
+            }
+
+            return { ...task, min: min < 10 ? `0${min}` : min, sec: sec < 10 ? `0${sec}` : sec };
+          } else {
+            return task;
+          }
+        });
+      });
     }, 1000);
   };
-
+  // останвка таймера
   const stopTimer = id => {
+    console.log('stop');
     const task = dataTasks.find(task => task.id === id);
     if (task) {
       const newArr = dataTasks.map(task => {
@@ -267,7 +276,6 @@ const App = () => {
         }
         return task;
       });
-
       setDataTasks(newArr);
       setFilteredDataTasks(newArrFilter);
     }
