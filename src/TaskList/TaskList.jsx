@@ -23,8 +23,8 @@ export default class TaskList extends Component {
             defaulDescription={task.defaulDescription}
             min={task.min}
             sec={task.sec}
-            stopTimer={() => stopTimer(task.id, task.timerIsTrue)}
-            startTimer={() => startTimer(task.id, task.min, task.sec, task.timerLast)}
+            stopTimer={() => stopTimer(task.id)}
+            startTimer={() => startTimer(task.id, task.min, task.sec, task.timerIsTrue)} // Передача id задачи в startTimer
             timerIsTrue={task.timerIsTrue}
             check={task.check}
           />

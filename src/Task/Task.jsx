@@ -23,7 +23,7 @@ export default class Task extends Component {
       startTimer,
       stopTimer,
       check,
-      timerIsTrue,
+      // timerIsTrue,
     } = this.props;
 
     if (status === 'editing') {
@@ -53,8 +53,8 @@ export default class Task extends Component {
           <label>
             <span className="title">{description}</span>
             <span className="description">
-              <button className="icon icon-play" onClick={startTimer} disabled={timerIsTrue}></button>
-              <button className="icon icon-pause" onClick={stopTimer} disabled={!timerIsTrue}></button>
+              <button className="icon icon-play" onClick={startTimer}></button>
+              <button className="icon icon-pause" onClick={stopTimer}></button>
               <p className="todo-timer">{`${min}:${sec}`}</p>
             </span>
             <span className="created">{timeCreated}</span>
