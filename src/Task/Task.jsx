@@ -7,6 +7,7 @@ export default class Task extends Component {
       this.props.startTimer(this.props.id);
     }
   }
+
   render() {
     const {
       status,
@@ -24,11 +25,13 @@ export default class Task extends Component {
       stopTimer,
       check,
       timerIsTrue,
+      editing,
+      cancelEdit,
     } = this.props;
 
-    if (status === 'editing') {
+    if (editing) {
       return (
-        <li className={status}>
+        <li className="editing">
           <div className="view">
             <input className="toggle" type="checkbox" />
             <label>
@@ -39,7 +42,7 @@ export default class Task extends Component {
             <button className="icon icon-destroy" onClick={onDeleted}></button>
           </div>
           <form action="" onSubmit={editSubmit}>
-            <input type="text" className="edit" defaultValue={defaulDescription} onChange={changeLabel} />
+            <input type="text" className="edit" defaultValue={defaulDescription} onChange={changeLabel} onKeyDown={cancelEdit} />
           </form>
         </li>
       );
