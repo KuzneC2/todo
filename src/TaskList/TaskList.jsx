@@ -4,8 +4,18 @@ import Task from '../Task/Task';
 
 export default class TaskList extends Component {
   render() {
-    const { dataTasks, toggleStatusTodo, onDeleted, onEdit, editSubmit, changeLabel, startTimer, stopTimer, cancelEdit } =
-      this.props;
+    const {
+      dataTasks,
+      toggleStatusTodo,
+      onDeleted,
+      onEdit,
+      editSubmit,
+      changeLabel,
+      startTimer,
+      stopTimer,
+      cancelEdit,
+      editTaskDescription,
+    } = this.props;
 
     return (
       <ul className="todo-list">
@@ -23,12 +33,13 @@ export default class TaskList extends Component {
             defaulDescription={task.defaulDescription}
             min={task.min}
             sec={task.sec}
-            stopTimer={() => stopTimer(task.id, task.timerId)}
-            startTimer={() => startTimer(task.id, task.min, task.sec, task.timerId)} // Передача id задачи в startTimer
+            stopTimer={() => stopTimer(task.id)}
+            startTimer={() => startTimer(task.id, task.min, task.sec, task.timerIsTrue)} // Передача id задачи в startTimer
             timerIsTrue={task.timerIsTrue}
             check={task.check}
             editing={task.editing}
             cancelEdit={e => cancelEdit(e, task.id)}
+            editTaskDescription={editTaskDescription}
           />
         ))}
       </ul>

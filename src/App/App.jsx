@@ -7,7 +7,6 @@ import './App.css';
 
 const App = () => {
   const maxId = useRef(100);
-  const timerId = useRef(100);
   const [dataTasks, setDataTasks] = useState([]);
   const [filterName, setFilterName] = useState('all');
   const [editTaskDescription, setEditTaskDescription] = useState('');
@@ -34,9 +33,8 @@ const App = () => {
       defaulDescription: description,
       min,
       sec,
-      timerIsTrue: true,
+      timerIsTrue: false,
       check: false,
-      timerId: timerId.current++,
     };
   };
 
@@ -47,25 +45,29 @@ const App = () => {
   };
 
   const addItem = (description, min, sec) => {
-    const newItem = createTodoItem(description, min, sec, new Date() - 1);
+    const newItem = createTodoItem(
+      description,
+      (min = min < 10 ? `0${min}` : min),
+      (sec = sec < 10 ? `0${sec}` : sec),
+      new Date() - 1,
+    );
     const newArr = [newItem, ...dataTasks];
     setDataTasks(newArr);
   };
 
   const editTask = id => {
-    const newDescription = dataTasks.find(el => el.id == id);
     const newData = dataTasks.map(task => {
-      if (task.editing === true) {
-        return { ...task, editing: false };
+      if (task.id === id) {
+        return { ...task, editing: !task.editing }; // Переключаем режим редактирования
       }
-      if (task.id == id) {
-        return { ...task, editing: true };
-      } else {
-        return task;
-      }
+      return { ...task, editing: false }; // Выключаем режим редактирования для остальных задач
     });
     setDataTasks(newData);
-    setEditTaskDescription(newDescription.description);
+
+    const taskToEdit = dataTasks.find(el => el.id === id);
+    if (taskToEdit) {
+      setEditTaskDescription(taskToEdit.description); // Устанавливаем текущее описание для редактирования
+    }
   };
 
   const editSubmit = (e, id) => {
@@ -102,14 +104,12 @@ const App = () => {
 
   const changeLabel = e => {
     console.log(e.target.value);
-    setEditTaskDescription(e.target.value);
+    const value = e.target.value;
+    setEditTaskDescription(value);
   };
 
   const changeStatus = id => {
     const updatedDataTasks = dataTasks.map(task => {
-      if (task.id == id && task.status == 'completed') {
-        startTimer(task.id, Number(task.min), Number(task.sec), null);
-      }
       if (task.id === id) {
         if (task.status === 'active') {
           return { ...task, status: 'completed', check: true, timerIsTrue: false };
@@ -142,23 +142,9 @@ const App = () => {
     setDataTasks(dataTasks.filter(el => el.status !== 'completed'));
   };
 
-  // const updateTimerTask = (id, min, sec) => {
-  //   const formattedMin = min < 10 ? `0${min}` : min;
-  //   const formattedSec = sec < 10 ? `0${sec}` : sec;
-
-  //   const newDataTasks = dataTasks.map(task => {
-  //     if (task.id === id) {
-  //       return { ...task, min: formattedMin, sec: formattedSec };
-  //     }
-  //     return task;
-  //   });
-
-  //   setDataTasks(newDataTasks);
-  // };
-
   // Таймер для задач
 
-  const startTimer = (id, min, sec, timerId) => {
+  const startTimer = (id, min, sec, timerLast) => {
     const newDataTasks = dataTasks.map(task => {
       if (task.id == id) {
         return { ...task, timerIsTrue: true };
@@ -167,7 +153,7 @@ const App = () => {
     });
     setDataTasks(newDataTasks);
 
-    timerId = setInterval(() => {
+    timerLast = setInterval(() => {
       setDataTasks(prevDataTasks => {
         return prevDataTasks.map(task => {
           if (task.id === id && task.timerIsTrue) {
@@ -175,9 +161,8 @@ const App = () => {
             sec = Number(sec);
 
             if (min === 0 && sec === 0) {
-              changeStatus(id);
-              clearInterval(timerId);
-              return task;
+              clearInterval(timerLast);
+              return { ...task, status: 'completed', check: true, timerIsTrue: false };
             } else if (min >= 1) {
               if (sec === 0) {
                 min--;
@@ -201,7 +186,6 @@ const App = () => {
         });
       });
     }, 1000);
-    return timerId;
   };
 
   const stopTimer = id => {
@@ -209,7 +193,7 @@ const App = () => {
     if (task) {
       const newArr = dataTasks.map(task => {
         if (task.id === id) {
-          clearInterval(task.timerId);
+          clearInterval(task.timerLast);
           return { ...task, timerIsTrue: false, timerLast: null };
         }
         return task;
@@ -234,6 +218,7 @@ const App = () => {
             toggleStatusTodo={changeStatus}
             onDeleted={deleteTask}
             onEdit={editTask}
+            editTaskDescription={editTaskDescription}
             editSubmit={editSubmit}
             changeLabel={changeLabel}
             startTimer={startTimer}
