@@ -103,7 +103,6 @@ const App = () => {
   };
 
   const changeLabel = e => {
-    console.log(e.target.value);
     const value = e.target.value;
     setEditTaskDescription(value);
   };
