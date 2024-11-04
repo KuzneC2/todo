@@ -218,7 +218,6 @@ const App = () => {
             toggleStatusTodo={changeStatus}
             onDeleted={deleteTask}
             onEdit={editTask}
-            editTaskDescription={editTaskDescription}
             editSubmit={editSubmit}
             changeLabel={changeLabel}
             startTimer={startTimer}

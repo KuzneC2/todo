@@ -1,53 +1,33 @@
-import { Component } from 'react';
-import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-export default class TasksFilter extends Component {
-  constructor() {
-    super();
-    this.state = {
-      filterDirectory: 'all',
-    };
-  }
+const TasksFilter = props => {
+  const [filterDirectory, setFilterDirectory] = useState('all');
 
-  changeDirectory(filter) {
-    this.setState({
-      filterDirectory: filter,
-    });
-    this.props.onChangeFilter(filter);
-  }
+  const changeDirectory = filter => {
+    setFilterDirectory(filter);
 
-  render() {
-    const { filterDirectory } = this.state;
-    return (
-      <ul className="filters">
-        <li>
-          <button className={filterDirectory === 'all' ? 'selected' : ''} onClick={() => this.changeDirectory('all')}>
-            All
-          </button>
-        </li>
-        <li>
-          <button className={filterDirectory === 'active' ? 'selected' : ''} onClick={() => this.changeDirectory('active')}>
-            Active
-          </button>
-        </li>
-        <li>
-          <button className={filterDirectory === 'completed' ? 'selected' : ''} onClick={() => this.changeDirectory('completed')}>
-            Completed
-          </button>
-        </li>
-      </ul>
-    );
-  }
-}
+    props.onChangeFilter(filter);
+  };
 
-TasksFilter.propTypes = {
-  changeDirectoryAll: PropTypes.func,
-  changeDirectoryActive: PropTypes.func,
-  changeDirectoryComplete: PropTypes.func,
+  return (
+    <ul className="filters">
+      <li>
+        <button className={filterDirectory === 'all' ? 'selected' : ''} onClick={() => changeDirectory('all')}>
+          All
+        </button>
+      </li>
+      <li>
+        <button className={filterDirectory === 'active' ? 'selected' : ''} onClick={() => changeDirectory('active')}>
+          Active
+        </button>
+      </li>
+      <li>
+        <button className={filterDirectory === 'completed' ? 'selected' : ''} onClick={() => changeDirectory('completed')}>
+          Completed
+        </button>
+      </li>
+    </ul>
+  );
 };
 
-TasksFilter.defaultProps = {
-  changeDirectoryAll: () => {},
-  changeDirectoryActive: () => {},
-  changeDirectoryComplete: () => {},
-};
+export default TasksFilter;

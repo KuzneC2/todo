@@ -15,6 +15,7 @@ const Task = ({
   check,
   timerIsTrue,
   editing,
+  cancelEdit,
 }) => {
   if (editing) {
     return (
@@ -29,7 +30,7 @@ const Task = ({
           <button className="icon icon-destroy" onClick={onDeleted}></button>
         </div>
         <form action="" onSubmit={editSubmit}>
-          <input type="text" className="edit" value={defaulDescription} onChange={changeLabel} />
+          <input type="text" className="edit" defaultValue={defaulDescription} onChange={changeLabel} onKeyDown={cancelEdit} />
         </form>
       </li>
     );
