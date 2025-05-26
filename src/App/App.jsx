@@ -12,8 +12,8 @@ class App extends Component {
     this.state = {
       dataTasks: [
         this.createTodoItem("обезуметь", "2024-10-14T15:05:10", "completed"),
-        this.createTodoItem("поспать 8 часов", "2024-10-14T14:59:10", ""),
-        this.createTodoItem("сделать проект", "2024-10-14T14:59:00"),
+        this.createTodoItem("поспать 8 часов", "2025-02-14T14:59:10", ""),
+        this.createTodoItem("сделать проект", "2025-04-14T14:59:00"),
       ],
       filteredDataTasks: [],
       filterName: "all",
